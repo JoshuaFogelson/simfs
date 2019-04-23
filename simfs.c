@@ -431,6 +431,7 @@ SIMFS_DIR_ENT ** findFileInDirectory(SIMFS_INDEX_TYPE file, SIMFS_NAME_TYPE file
  *            the slot for this file
  *          - copies the in-memory bitvector to the bitvector blocks on the simulated disk
  */
+
 SIMFS_ERROR simfsDeleteFile(SIMFS_NAME_TYPE fileName)
 {
     // TODO: implement
@@ -463,15 +464,18 @@ SIMFS_ERROR simfsDeleteFile(SIMFS_NAME_TYPE fileName)
     if ( (filefd->type == SIMFS_FOLDER_CONTENT_TYPE) && (filefd->size == 0) )
         return SIMFS_NOT_EMPTY_ERROR;
     
-    //Check to see that the user can delete the file/folder
-    mode_t can (context->uid == filefd->owner)
-        ?
-can &= filefd->accessRights;
-    else
-        can &= 
-        
+    //TODO do you have permissions?
+    //  If user use pcb->permisions & I_SWUSR
+    //  else use pcb->permissions & I_SWOTH
 
-    SIMFS_ACCESS_ERROR
+    simfsVolume->block[containingIndexBlock].content.index[positionInIndexBlock] =
+        simfsVolume->block[containingIndexBlock].content.index[sizeOfIndexBlock-1];
+
+    SIMFS_DIR_ENT * trash_ent = *ent;
+    *ent = (*ent)->next;
+    free(trash_ent);
+
+    
 
     return SIMFS_NO_ERROR;
 }
