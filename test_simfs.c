@@ -49,7 +49,7 @@ int main()
     error = PrintError(simfsMountFileSystem(SIMFS_FILE_NAME));
     if (error != SIMFS_NO_ERROR)
         exit(EXIT_FAILURE);
-
+    /*
     error = PrintError(simfsCreateFile("batman.txt", SIMFS_FILE_CONTENT_TYPE));
     if (error != SIMFS_NO_ERROR)
         exit(EXIT_FAILURE);
@@ -68,6 +68,27 @@ int main()
     printf("No expected error");
     error = PrintError(simfsDeleteFile("batman.txt"));
 
-    printf("\nSuccess!\n");
+    printf("\nSuccess!\n");*/
+
+    printf("testing tasks 1 and 2\n");
+     error = simfsCreateFile("test", SIMFS_FOLDER_CONTENT_TYPE);
+    error = simfsCreateFile("test", SIMFS_FOLDER_CONTENT_TYPE);
+    simfsDeleteFile("test");
+    simfsDeleteFile("test");
+    printf("testing\n");
+    simfsCreateFile("test", SIMFS_FOLDER_CONTENT_TYPE);
+    simfsCreateFile("test2", SIMFS_FILE_CONTENT_TYPE);
+    simfsCreateFile("test3", SIMFS_DATA_CONTENT_TYPE);
+    printf("Remount!\n");
+    simfsUmountFileSystem("yo");
+    simfsMountFileSystem("yo");
+    simfsUmountFileSystem("yo");
+    simfsMountFileSystem("yo");
+    simfsCreateFile("test", SIMFS_FOLDER_CONTENT_TYPE);
+    simfsDeleteFile("test");
+    simfsDeleteFile("test");
+    simfsCreateFile("test", SIMFS_FOLDER_CONTENT_TYPE);
+    simfsCreateFile("test2", SIMFS_FILE_CONTENT_TYPE);
+    simfsCreateFile("test3", SIMFS_DATA_CONTENT_TYPE);
     return EXIT_SUCCESS;
 }

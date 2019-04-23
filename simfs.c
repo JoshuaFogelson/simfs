@@ -491,10 +491,11 @@ SIMFS_ERROR simfsDeleteFile(SIMFS_NAME_TYPE fileName)
     SIMFS_DIR_ENT ** ent = findFileInDirectory(file, fileName);
     if (ent == NULL)
         return SIMFS_NOT_FOUND_ERROR;
-    
-    //Find the file in the global open file table
-    if (simfsContext->globalOpenFileTable[(*ent)->globalOpenFileTableIndex].referenceCount != 0)
-        return SIMFS_WRITE_ERROR;
+
+    unsigned int actuallyFunny = (*ent)->globalOpenFileTableIndex;
+    if (actuallyFunny != SIMFS_INVALID_OPEN_FILE_TABLE_INDEX)
+        if (simfsContext->globalOpenFileTable[actuallyFunny].referenceCount != 0)
+            return SIMFS_WRITE_ERROR;
 
     //Check to see that file (if a directory) is empty
     SIMFS_FILE_DESCRIPTOR_TYPE * filefd = &(simfsVolume->block[file].content.fileDescriptor);
