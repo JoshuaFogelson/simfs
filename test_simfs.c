@@ -56,13 +56,17 @@ int main()
 
     printf("Expect Error SIMFS_DUPLICATE_ERROR\n");
     error = PrintError(simfsCreateFile("batman.txt", SIMFS_FILE_CONTENT_TYPE));
-    if (error != SIMFS_DUPLICATE_ERROR)
-        exit(EXIT_FAILURE);
+    if (error != SIMFS_DUPLICATE_ERROR){
+ //       exit(EXIT_FAILURE);
+    }
 
     SIMFS_FILE_DESCRIPTOR_TYPE infoBuffer;
     error = PrintError(simfsGetFileInfo("batman.txt", &infoBuffer));
     if (error != SIMFS_NOT_FOUND_ERROR)
-        exit(EXIT_FAILURE);
+   //     exit(EXIT_FAILURE);
+
+    printf("No expected error");
+    error = PrintError(simfsDeleteFile("batman.txt"));
 
     printf("\nSuccess!\n");
     return EXIT_SUCCESS;

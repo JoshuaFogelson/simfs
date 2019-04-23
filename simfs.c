@@ -414,6 +414,43 @@ SIMFS_DIR_ENT ** findFileInDirectory(SIMFS_INDEX_TYPE file, SIMFS_NAME_TYPE file
     return NULL;
 }
 
+void deleteFileIndices(SIMFS_FILE_DESCRIPTOR_TYPE * filefd)
+{
+    //Nothing to delete
+    if (filefd->size == 0)
+        return;
+
+    if (filefd->size > SIMFS_DATA_SIZE) {
+        simfsClearBit(simfsContext->bitvector, filefd->block_ref);
+        simfsClearBit(simfsVolume->bitvector, filefd->block_ref);
+        return;
+    }
+
+    //If 
+    int CONTEXT_DATA_SIZE = (SIMFS_INDEX_SIZE-1) * (SIMFS_DATA_SIZE-1);
+    int size = filefd->size;
+    SIMFS_INDEX_TYPE indexBlock = filefd->block_ref;
+    for (; size > CONTEXT_DATA_SIZE; size -= CONTEXT_DATA_SIZE) {
+        for (int i=0; i < SIMFS_INDEX_SIZE; ++i) {
+            simfsClearBit(simfsContext->bitvector, simfsVolume->block[indexBlock].content.index[i]);
+            simfsClearBit(simfsVolume->bitvector, simfsVolume->block[indexBlock].content.index[i]);
+        }
+        SIMFS_INDEX_TYPE temp = indexBlock;
+        indexBlock = simfsVolume->block[indexBlock].content.index[SIMFS_INDEX_SIZE-1];
+        simfsClearBit(simfsContext->bitvector, temp);
+        simfsClearBit(simfsVolume->bitvector, temp);
+    }
+    for (int i=0; i< (size / SIMFS_DATA_SIZE); ++i) {
+        simfsClearBit(simfsContext->bitvector, simfsVolume->block[indexBlock].content.index[i]);
+        simfsClearBit(simfsVolume->bitvector, simfsVolume->block[indexBlock].content.index[i]);    
+        size -= SIMFS_DATA_SIZE;
+    }
+    if (size > 0) {
+        simfsClearBit(simfsContext->bitvector, indexBlock);
+        simfsClearBit(simfsVolume->bitvector, indexBlock);
+    }
+}
+
 /***
  * Deletes a file from the file system.
  *
@@ -461,7 +498,7 @@ SIMFS_ERROR simfsDeleteFile(SIMFS_NAME_TYPE fileName)
 
     //Check to see that file (if a directory) is empty
     SIMFS_FILE_DESCRIPTOR_TYPE * filefd = &(simfsVolume->block[file].content.fileDescriptor);
-    if ( (filefd->type == SIMFS_FOLDER_CONTENT_TYPE) && (filefd->size == 0) )
+    if ( (filefd->type == SIMFS_FOLDER_CONTENT_TYPE) && (filefd->size != 0) )
         return SIMFS_NOT_EMPTY_ERROR;
     
     //TODO do you have permissions?
@@ -475,8 +512,13 @@ SIMFS_ERROR simfsDeleteFile(SIMFS_NAME_TYPE fileName)
     *ent = (*ent)->next;
     free(trash_ent);
 
-    
+    if (cwdfd->type == SIMFS_FILE_CONTENT_TYPE) {
+        deleteFileIndices(filefd);
+    }
 
+    simfsClearBit(simfsContext->bitvector, file);
+    simfsClearBit(simfsVolume->bitvector, file);
+    cwdfd->size--;
     return SIMFS_NO_ERROR;
 }
 
